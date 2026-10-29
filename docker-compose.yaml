@@ -16,13 +16,9 @@ services:
       - secure_node_modules:/app/node_modules
     command: pnpm dev
     healthcheck:
-      test:
-        - CMD
-        - node
-        - -e
-        - >-
-          fetch('http://127.0.0.1:5001/health').then((response) =>
-          process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))
+      test: >-
+        node -e "fetch('http://127.0.0.1:5001/health').then((response) =>
+        process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 10s
       timeout: 5s
       retries: 5
@@ -45,13 +41,9 @@ services:
       - unsecure_node_modules:/app/node_modules
     command: pnpm dev
     healthcheck:
-      test:
-        - CMD
-        - node
-        - -e
-        - >-
-          fetch('http://127.0.0.1:5002/health').then((response) =>
-          process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))
+      test: >-
+        node -e "fetch('http://127.0.0.1:5002/health').then((response) =>
+        process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 10s
       timeout: 5s
       retries: 5
