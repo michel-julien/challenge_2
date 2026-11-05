@@ -1,17 +1,21 @@
 import jwt from "jsonwebtoken";
 
 import { env } from "../config/env.js";
+import { readSessionCookie } from "../services/sessionCookie.js";
 import { createHttpError } from "./errorHandler.js";
 import { users } from "../store.js";
 
 export function authenticate(request, _response, next) {
   const authorization = request.get("authorization");
 
-  if (!authorization?.startsWith("Bearer ")) {
+  const bearerToken = authorization?.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length)
+    : null;
+  const token = bearerToken ?? readSessionCookie(request);
+
+  if (!token) {
     return next(createHttpError(401, "Authentication required"));
   }
-
-  const token = authorization.slice("Bearer ".length);
 
   try {
     const payload = jwt.verify(token, env.jwtSecret, {

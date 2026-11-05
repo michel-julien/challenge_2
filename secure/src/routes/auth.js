@@ -15,6 +15,10 @@ import {
   recordLoginFailure,
   recordLoginSuccess,
 } from "../services/securityEvents.js";
+import {
+  serializeClearedSessionCookie,
+  serializeSessionCookie,
+} from "../services/sessionCookie.js";
 import { publicUser, users } from "../store.js";
 
 const router = express.Router();
@@ -24,9 +28,21 @@ router.post(
   validate(registerSchema),
   async (request, response, next) => {
     try {
-      const { email, password, username } = request.body;
+      const {
+        email,
+        fullName: requestedFullName,
+        password,
+        studentId: requestedStudentId,
+        username: requestedUsername,
+      } = request.body;
+      const username = requestedUsername ?? requestedFullName;
+      const fullName = requestedFullName ?? requestedUsername;
+      const studentId = requestedStudentId ?? username;
       const duplicate = [...users.values()].some(
-        (user) => user.email === email || user.username === username,
+        (user) =>
+          user.email === email ||
+          user.username === username ||
+          user.studentId === studentId,
       );
 
       if (duplicate) {
@@ -36,6 +52,8 @@ router.post(
       const user = {
         id: randomUUID(),
         username,
+        fullName,
+        studentId,
         email,
         passwordHash: await bcrypt.hash(password, 12),
         role: "student",
@@ -49,6 +67,11 @@ router.post(
     }
   },
 );
+
+router.post("/logout", (_request, response) => {
+  response.setHeader("Set-Cookie", serializeClearedSessionCookie());
+  return response.status(204).end();
+});
 
 router.post(
   "/login",
@@ -83,6 +106,7 @@ router.post(
         { expiresIn: env.jwtExpiresIn, algorithm: "HS256" },
       );
 
+      response.setHeader("Set-Cookie", serializeSessionCookie(token));
       return response.json({ token, user: publicUser(user) });
     } catch (error) {
       return next(error);

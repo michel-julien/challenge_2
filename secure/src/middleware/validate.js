@@ -4,11 +4,17 @@ import { createHttpError } from "./errorHandler.js";
 
 export const registerSchema = z
   .object({
-    username: z.string().min(3).max(50),
+    username: z.string().trim().min(3).max(50).optional(),
+    fullName: z.string().trim().min(1).max(100).optional(),
+    studentId: z.string().trim().min(1).max(20).optional(),
     email: z.string().email(),
     password: z.string().min(8).max(128),
   })
-  .strict();
+  .strict()
+  .refine(
+    (value) => Boolean(value.username || value.fullName),
+    "username or fullName is required",
+  );
 
 export const loginSchema = z
   .object({

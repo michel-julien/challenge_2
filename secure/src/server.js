@@ -12,13 +12,23 @@ import fileRoutes from "./routes/files.js";
 import userRoutes from "./routes/users.js";
 
 export const app = express();
+const allowedOrigins = env.corsOrigin
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: env.corsOrigin,
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS origin is not allowed"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Accept", "Authorization"],
   }),
 );
 app.use(express.json({ limit: "100kb" }));

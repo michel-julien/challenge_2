@@ -37,6 +37,10 @@ export function recordLoginSuccess(identifier) {
   loginFailures.delete(identifier);
 }
 
+export function resetSecurityEvents() {
+  loginFailures.clear();
+}
+
 export function recordAccessDenied(user, resource) {
   logger.warn(
     { userId: user.id, role: user.role, resource },

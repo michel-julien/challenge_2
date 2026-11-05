@@ -25,7 +25,12 @@ export function errorHandler(error, request, response, next) {
     error.statusCode ??
     error.status ??
     (error.name === "MulterError" ? 400 : 500);
-  const message = statusCode >= 500 ? "Internal server error" : error.message;
+  const message =
+    statusCode >= 500
+      ? "Internal server error"
+      : statusCode === 404
+        ? "Not found"
+        : error.message;
 
   return response.status(statusCode).json({ error: message });
 }
