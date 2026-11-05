@@ -1,15 +1,20 @@
 import jwt from "jsonwebtoken";
 
+import { readSessionCookie } from "./sessionCookie.js";
+
 const JWT_SECRET = "secret";
 
 export function authenticate(request, response, next) {
   const authorization = request.get("authorization");
 
-  if (!authorization?.startsWith("Bearer ")) {
+  const bearerToken = authorization?.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length)
+    : null;
+  const token = bearerToken ?? readSessionCookie(request);
+
+  if (!token) {
     return response.status(401).json({ error: "Missing bearer token" });
   }
-
-  const token = authorization.slice("Bearer ".length);
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);

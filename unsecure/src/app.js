@@ -5,6 +5,27 @@ import fileRoutes from "./routes/files.js";
 import userRoutes from "./routes/users.js";
 
 const app = express();
+const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:5000";
+
+app.use((request, response, next) => {
+  const origin = request.get("origin");
+
+  if (origin && origin !== corsOrigin) {
+    return response.status(403).json({ error: "Origin is not allowed" });
+  }
+
+  response.setHeader("Access-Control-Allow-Origin", origin ?? corsOrigin);
+  response.setHeader("Access-Control-Allow-Credentials", "true");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization");
+  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  response.setHeader("Vary", "Origin");
+
+  if (request.method === "OPTIONS") {
+    return response.sendStatus(204);
+  }
+
+  return next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
