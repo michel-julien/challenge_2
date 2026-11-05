@@ -1,14 +1,15 @@
-// Single entry point for all network calls. See API_CONTRACT.md.
+// Single entry point for all network calls. The same client can target either
+// backend by changing NEXT_PUBLIC_API_URL.
 //
-// Authentication uses an httpOnly session cookie set by the backend, so every
-// request is sent with `credentials: "include"`. Tokens are never stored in
-// localStorage or anywhere else readable by JavaScript.
+// Authentication uses the httpOnly session cookie set by the backend. Every
+// request includes credentials and the JWT is never stored in browser storage.
 import {
   ApiError,
   type ApiClient,
   type LoginInput,
   type RegisterInput,
   type User,
+  type UserRole,
 } from "./api-types";
 import { mockApi } from "./mock-api";
 
@@ -16,7 +17,26 @@ export * from "./api-types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ?? "";
 
-/** True when no backend URL is configured and the in-memory mock is used. */
+interface BackendUser {
+  id: string | number;
+  email: string;
+  role?: UserRole;
+  fullName?: string;
+  username?: string;
+  studentId?: string;
+}
+
+function normalizeUser(user: BackendUser): User {
+  return {
+    id: String(user.id),
+    fullName: user.fullName ?? user.username ?? user.email,
+    studentId: user.studentId ?? String(user.id),
+    email: user.email,
+    role: user.role ?? "student",
+  };
+}
+
+// True when no backend URL is configured and the in memory mock is used
 export const isMockApi = API_URL === "";
 
 async function request<T>(
@@ -53,7 +73,7 @@ async function request<T>(
         message = data.error;
       }
     } catch {
-      // Non-JSON error body; keep the default message.
+      // Non JSON error body keep the default message.
     }
     throw new ApiError(res.status, message);
   }
@@ -64,29 +84,29 @@ async function request<T>(
 
 const httpApi: ApiClient = {
   async register(input: RegisterInput) {
-    const { user } = await request<{ user: User }>("/api/auth/register", {
+    const { user } = await request<{ user: BackendUser }>("/auth/register", {
       method: "POST",
       body: input,
     });
-    return user;
+    return normalizeUser(user);
   },
 
   async login(input: LoginInput) {
-    const { user } = await request<{ user: User }>("/api/auth/login", {
+    const { user } = await request<{ user: BackendUser }>("/auth/login", {
       method: "POST",
       body: input,
     });
-    return user;
+    return normalizeUser(user);
   },
 
   async logout() {
-    await request<void>("/api/auth/logout", { method: "POST" });
+    await request<void>("/auth/logout", { method: "POST" });
   },
 
   async getMe() {
     try {
-      const { user } = await request<{ user: User }>("/api/users/me");
-      return user;
+      const { user } = await request<{ user: BackendUser }>("/users/me");
+      return normalizeUser(user);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) return null;
       throw err;

@@ -26,8 +26,8 @@ export function AuthDialog() {
           Log in
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-h-[calc(100dvh-1.5rem)] overflow-y-auto p-0 sm:max-w-lg">
+        <DialogHeader className="border-b border-border/70 px-6 pb-5 pt-6 pr-14">
           <DialogTitle>
             {dialogTab === "login" ? "Log in to CampusAPI" : "Create an account"}
           </DialogTitle>
@@ -40,20 +40,16 @@ export function AuthDialog() {
         <Tabs
           value={dialogTab}
           onValueChange={(v) => setDialogTab(v as AuthTab)}
+          className="gap-5 p-6 pt-5"
         >
-          <TabsList className="w-full">
+          <TabsList className="grid h-11 w-full grid-cols-2 bg-muted/70 p-1">
             <TabsTrigger value="login">Log in</TabsTrigger>
             <TabsTrigger value="register">Register</TabsTrigger>
           </TabsList>
-          <TabsContent value="login" className="pt-2">
+          <TabsContent value="login">
             <LoginForm onSuccess={close} />
-            {isMockApi && (
-              <p className="mt-4 text-center text-xs text-muted-foreground">
-                Mock API demo login: demo@campus.edu / password123
-              </p>
-            )}
           </TabsContent>
-          <TabsContent value="register" className="pt-2">
+          <TabsContent value="register">
             <RegisterForm onSuccess={close} />
           </TabsContent>
         </Tabs>

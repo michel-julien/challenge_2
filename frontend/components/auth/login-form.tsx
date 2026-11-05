@@ -67,12 +67,13 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
       <FieldGroup className="gap-4">
-        <Field data-invalid={!!errors.email}>
+        <Field className="gap-1.5" data-invalid={!!errors.email}>
           <FieldLabel htmlFor="login-email">Email</FieldLabel>
           <Input
             id="login-email"
+            name="email"
             type="email"
             autoComplete="email"
             placeholder="you@campus.edu"
@@ -83,10 +84,11 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
           />
           <FieldError errors={toFieldErrors(errors.email)} />
         </Field>
-        <Field data-invalid={!!errors.password}>
+        <Field className="gap-1.5" data-invalid={!!errors.password}>
           <FieldLabel htmlFor="login-password">Password</FieldLabel>
           <Input
             id="login-password"
+            name="password"
             type="password"
             autoComplete="current-password"
             value={values.password}
@@ -96,7 +98,7 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
           />
           <FieldError errors={toFieldErrors(errors.password)} />
         </Field>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" size="lg" className="w-full" disabled={pending}>
           {pending && <Loader2Icon className="animate-spin" />}
           {pending ? "Logging in…" : "Log in"}
         </Button>

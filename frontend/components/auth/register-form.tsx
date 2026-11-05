@@ -43,17 +43,52 @@ const initialValues: Values = {
 const fields: {
   name: keyof Values;
   label: string;
-  type: string;
+  type: "text" | "email" | "password";
   autoComplete: string;
   placeholder?: string;
   description?: string;
 }[] = [
-  { name: "fullName", label: "Full name", type: "text", autoComplete: "name", placeholder: "Jane Doe" },
-  { name: "studentId", label: "Student ID", type: "text", autoComplete: "off", placeholder: "S1234567" },
-  { name: "email", label: "Email", type: "email", autoComplete: "email", placeholder: "you@campus.edu" },
-  { name: "confirmEmail", label: "Confirm email", type: "email", autoComplete: "email", placeholder: "you@campus.edu" },
-  { name: "password", label: "Password", type: "password", autoComplete: "new-password", description: "At least 8 characters." },
-  { name: "confirmPassword", label: "Confirm password", type: "password", autoComplete: "new-password" },
+  {
+    name: "fullName",
+    label: "Full name",
+    type: "text",
+    autoComplete: "name",
+    placeholder: "Jane Doe",
+  },
+  {
+    name: "studentId",
+    label: "Student ID",
+    type: "text",
+    autoComplete: "off",
+    placeholder: "1234567",
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "email",
+    autoComplete: "email",
+    placeholder: "you@campus.edu",
+  },
+  {
+    name: "confirmEmail",
+    label: "Confirm email",
+    type: "email",
+    autoComplete: "email",
+    placeholder: "you@campus.kmu",
+  },
+  {
+    name: "password",
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    description: "At least 8 characters.",
+  },
+  {
+    name: "confirmPassword",
+    label: "Confirm password",
+    type: "password",
+    autoComplete: "new-password",
+  },
 ];
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -99,15 +134,20 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <FieldGroup className="gap-4">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <FieldGroup className="gap-4 sm:grid sm:grid-cols-2">
         {fields.map((f) => {
           const id = `register-${f.name}`;
           return (
-            <Field key={f.name} data-invalid={!!errors[f.name]}>
+            <Field
+              key={f.name}
+              className="min-w-0 gap-1.5"
+              data-invalid={!!errors[f.name]}
+            >
               <FieldLabel htmlFor={id}>{f.label}</FieldLabel>
               <Input
                 id={id}
+                name={f.name}
                 type={f.type}
                 autoComplete={f.autoComplete}
                 placeholder={f.placeholder}
@@ -123,7 +163,12 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
             </Field>
           );
         })}
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:col-span-2"
+          disabled={pending}
+        >
           {pending && <Loader2Icon className="animate-spin" />}
           {pending ? "Creating account…" : "Create account"}
         </Button>
